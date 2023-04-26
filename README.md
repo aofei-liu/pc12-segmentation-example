@@ -1,2 +1,13 @@
-"##PC12 Segmentation" 
-"# pc12-segmentation-example" 
+ # pc12-segmentation-example
+ 
+An example pipeline for segmenting and processing immunofluorescence images taken on a widefield fluorescence microscope (Leica). The raw input are .lif files containing image stacks with 5 channels per image (Brightfield, nuclear stain, 488 antibody stain, cell fluorescence from transfection, 647 antibody stain). The end goal is to segment and identify cells based on the fourth channel (cell fluorescence), filter for cells expressing a high amount of the construct, and measure the intensity on the 488 antibody channel. 
+
+Requires [``cellpose``](https://github.com/MouseLand/cellpose), [CellProfiler](https://cellprofiler.org/), [ImageJ](https://imagej.nih.gov/ij/download.html) with the [bio-formats](https://imagej.net/formats/bio-formats) plugin, and python ([jupyter](https://jupyter.org/) preferred) with the usual data processing/visualization packages (numpy, pandas, seaborn etc) installed, as well as [``statannot``](https://github.com/webermarcolivier/statannot) for easy statistical annotation.
+
+The .lif files are first put through the ImageJ macro to export the stacks as 3-channel images containing the relevant channels (Fluorescence, 488 antibody, nuclear in that order). From here, the cellpose GUI (called via ``python -m cellpose``) can be used to manually annotate a set of images, or to refine the segmentation results from one of the presets (CP, cyto and cyto2 are usually good starting points). One can then finetune the cellpose segmentation networks on the set of manually annotated image using the command line input documented in ``cellpose_train.txt``. One can iterate through this step as many times as they like, until the network performs at a satsifactory level. An example finetuned network is available in the ``models`` folder, and example _seg.npy and png mask outputs are available in the ``example images`` folder.
+
+When a satisfactory segmentation is achieved, use the other command line input documented in ``cellpose_train.txt`` to apply it to all the images in the folder (optionally, add the ``--no_npy`` flag to save on space, since we won't be needing the _seg.npy file if we are pipelining the masks to CellProfiler.) 
+
+Drag all the tif stacks and png masks to the CellProfiler pipeline (.cpproj) to measure and output the intensity values for the masks into a single .csv file. One can also add additional elements to the CellProfiler pipeline to output additional metrics as desired. Note that this step is not strictly necessary, since one can directly pipeline the _seg.npy outputs from cellpose to a jupyter notebook to process the masks via scikit-image or OpenCV (see [``drg-histology-segmentation``](https://github.com/aofei-liu/drg-histology-segmentation) for an example, but CellProfiler is probably less intimidating to play around with for those who are less comfortable with coding. 
+
+Lastly, work up the .csv output from CellProfiler into plots in any scripting language you like. A Jupyter notebook is provided here as an example.
