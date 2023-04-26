@@ -1,0 +1,7 @@
+train:
+py -m cellpose --train --dir "/path/to/tif-image-directory" --pretrained_model "directory/to/pretrained-model" --mask_filter _seg.npy --chan 1 --chan2 3 --learning_rate 0.1 --weight_decay 0.0001 --n_epochs 100 --verbose --use_gpu 
+
+run:
+py -m cellpose --dir "/path/to/tif-image-directory" --chan 1 --chan2 3 --pretrained_model "directory/to/model" --save_png --savedir "/path/to/save" --verbose --use_gpu
+
+
